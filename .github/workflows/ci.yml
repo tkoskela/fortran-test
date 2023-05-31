@@ -1,0 +1,27 @@
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ubuntu-latest
+        toolchain:
+          - {compiler: gcc, version: 11}
+          - {compiler: intel-classic, version: '2021.9'}
+          - {compiler: intel, version: '2023.1'}
+
+    steps:
+      - uses: awvwgk/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: ${{ matrix.toolchain.compiler }}
+          version: ${{ matrix.toolchain.version }}
+
+      - run: |
+          sudo apt install openmpi-dev
+          
+      - run: ${{ env.FC }} --version
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+
+      - run: mpifort --version
